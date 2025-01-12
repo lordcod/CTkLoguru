@@ -1,5 +1,5 @@
+import customtkinter as ctk
 import tkinter as tk
-from tkinter import ttk
 import queue
 from loguru import logger
 import sys
@@ -8,7 +8,9 @@ import logging
 from datetime import datetime
 
 LEVELS = ["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"]
-LEVEL_NO_TO_NAME = {5: "TRACE", 10: "DEBUG", 20: "INFO", 25: "SUCCESS", 30: "WARNING", 40: "ERROR", 50: "CRITICAL"}
+LEVEL_NO_TO_NAME = {5: "TRACE", 10: "DEBUG", 20: "INFO",
+                    25: "SUCCESS", 30: "WARNING", 40: "ERROR", 50: "CRITICAL"}
+
 
 class LoggingInterceptHandler(logging.Handler):
     """
@@ -34,11 +36,13 @@ class LoggingInterceptHandler(logging.Handler):
         try:
             msg = self.format(record)
             level = record.levelname
-            self.widget.queue.put({"time": datetime.fromtimestamp(record.created), "level": level, "message": msg})
+            self.widget.queue.put({"time": datetime.fromtimestamp(
+                record.created), "level": level, "message": msg})
         except Exception:
             self.handleError(record)
 
-class LoguruWidget(ttk.Frame):
+
+class LoguruWidget(ctk.CTkFrame):
     """
     A custom tkinter widget for displaying log messages using the loguru library.
 
@@ -77,20 +81,21 @@ class LoguruWidget(ttk.Frame):
 
     def create_widgets(self):
         """Create and configure the text widget and scrollbar."""
-        self.text = tk.Text(self, wrap=tk.WORD, state=tk.DISABLED)
+        self.text = ctk.CTkTextbox(self, wrap=ctk.WORD, state=ctk.DISABLED)
         
         if self.show_scrollbar:
-            self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.text.yview)
+            self.scrollbar = ctk.CTkScrollbar(
+                self, command=self.text.yview)
             self.text.configure(yscrollcommand=self.scrollbar.set)
-        
+
         self.update_tag_colors()
-    
+
     def _configure_layout(self):
         """Configure the layout of child widgets based on the chosen geometry manager."""
         if self._layout_manager == "pack":
             if self.show_scrollbar:
-                self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-            self.text.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
+                self.scrollbar.pack(side=ctk.RIGHT, fill=ctk.Y)
+            self.text.pack(side=ctk.LEFT, expand=True, fill=ctk.BOTH)
         elif self._layout_manager == "grid":
             self.grid_rowconfigure(0, weight=1)
             self.grid_columnconfigure(0, weight=1)
@@ -103,9 +108,10 @@ class LoguruWidget(ttk.Frame):
         """Update the color tags for different log levels in the text widget."""
         for level, color in self.log_colors.items():
             if isinstance(color, tuple):
-                self.text.tag_configure(level, foreground=color[0], background=color[1])
+                self.text.tag_config(
+                    level, foreground=color[0], background=color[1])
             else:
-                self.text.tag_configure(level, foreground=color)
+                self.text.tag_config(level, foreground=color)
 
     def check_queue(self):
         """Check the queue for new log messages and update the widget."""
@@ -128,27 +134,28 @@ class LoguruWidget(ttk.Frame):
         Args:
             record (dict): A dictionary containing the log record information.
         """
-        self.text.configure(state=tk.NORMAL)
-        
+        self.text.configure(state=ctk.NORMAL)
+
         time_str = record["time"].strftime("%Y-%m-%d %H:%M:%S")
         level = record["level"]
         message = record["message"]
-        
+
         if self.color_mode == 'full':
-            self.text.insert(tk.END, f"{time_str} | {level:8} | {message}\n", level)
+            self.text.insert(
+                ctk.END, f"{time_str} | {level:8} | {message}\n", level)
         elif self.color_mode == 'message':
-            self.text.insert(tk.END, f"{time_str} | {level:8} | ", "")
-            self.text.insert(tk.END, f"{message}\n", level)
+            self.text.insert(ctk.END, f"{time_str} | {level:8} | ", "")
+            self.text.insert(ctk.END, f"{message}\n", level)
         else:  # 'level' mode (default)
-            self.text.insert(tk.END, f"{time_str} | ", "")
-            self.text.insert(tk.END, f"{level:8}", level)
-            self.text.insert(tk.END, f" | {message}\n", "")
-        
+            self.text.insert(ctk.END, f"{time_str} | ", "")
+            self.text.insert(ctk.END, f"{level:8}", level)
+            self.text.insert(ctk.END, f" | {message}\n", "")
+
         if int(self.text.index('end-1c').split('.')[0]) > self.max_lines:
             self.text.delete('1.0', '2.0')
-        
-        self.text.see(tk.END)
-        self.text.configure(state=tk.DISABLED)
+
+        self.text.see(ctk.END)
+        self.text.configure(state=ctk.DISABLED)
 
     def sink(self, message):
         """
@@ -177,7 +184,7 @@ class LoguruWidget(ttk.Frame):
         """
         self.log_colors[level] = color
         self.update_tag_colors()
-    
+
     @staticmethod
     def get_logging_level():
         """
@@ -187,7 +194,8 @@ class LoguruWidget(ttk.Frame):
             str: The name of the current logging level.
         """
         current_level_no = logger._core.min_level
-        current_level = LEVEL_NO_TO_NAME.get(current_level_no, "INFO")  # Default to INFO if level is not found
+        # Default to INFO if level is not found
+        current_level = LEVEL_NO_TO_NAME.get(current_level_no, "INFO")
         return current_level
 
     def set_logging_level(self, level):
@@ -213,7 +221,7 @@ class LoguruWidget(ttk.Frame):
             self._layout_manager = "grid"
             self._configure_layout()
         super().grid(**kwargs)
-    
+
     def place(self, **kwargs):
         """Place the widget and configure its children for pack layout."""
         if self._layout_manager is None:
@@ -232,6 +240,7 @@ class LoguruWidget(ttk.Frame):
             pass
         self.update()
 
+
 def setup_logger(widget):
     """
     Set up the loguru logger to use the custom widget as a sink.
@@ -243,7 +252,7 @@ def setup_logger(widget):
     """
     logger.remove()
     logger.add(widget.sink, backtrace=True, diagnose=True)
-    
+
     if widget.intercept_logging:
         logging.getLogger().addHandler(LoggingInterceptHandler(widget))
         logging.getLogger().setLevel(logging.DEBUG)
@@ -251,11 +260,12 @@ def setup_logger(widget):
 
 # Example usage
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = ctk.CTk()
     root.title("LoguruWidget Example")
     root.geometry("800x600")
 
-    log_widget = LoguruWidget(root, show_scrollbar=True, color_mode='level', max_lines=1000, intercept_logging=True)
+    log_widget = LoguruWidget(
+        root, show_scrollbar=True, color_mode='level', max_lines=1000, intercept_logging=True)
     log_widget.pack(expand=True, fill=tk.BOTH, padx=10, pady=10)
 
     setup_logger(log_widget)
@@ -271,7 +281,7 @@ if __name__ == "__main__":
         logger.warning("This is a warning message")
         logger.error("This is an error message")
         logger.critical("This is a critical message")
-        
+
         # Test standard logging
         logging.debug("Standard logging: debug message")
         logging.info("Standard logging: info message")
@@ -280,10 +290,11 @@ if __name__ == "__main__":
         logging.critical("Standard logging: critical message")
 
     # Create buttons to generate logs and change settings
-    button_frame = ttk.Frame(root)
+    button_frame = ctk.CTkFrame(root)
     button_frame.pack(fill=tk.X, padx=10, pady=5)
 
-    generate_logs_button = ttk.Button(button_frame, text="Generate Sample Logs", command=generate_sample_logs)
+    generate_logs_button = ctk.CTkButton(
+        button_frame, text="Generate Sample Logs", command=generate_sample_logs)
     generate_logs_button.pack(side=tk.LEFT, padx=5)
 
     def change_color_mode():
@@ -291,12 +302,13 @@ if __name__ == "__main__":
         current_mode = log_widget.color_mode
         new_mode = 'full' if current_mode == 'level' else 'level' if current_mode == 'message' else 'message'
         log_widget.color_mode = new_mode
-        
+
         current_level = log_widget.get_logging_level()
         log_func = getattr(logger, current_level.lower())
         log_func(f"Changed color mode to: {new_mode}")
 
-    color_mode_button = ttk.Button(button_frame, text="Change Color Mode", command=change_color_mode)
+    color_mode_button = ctk.CTkButton(
+        button_frame, text="Change Color Mode", command=change_color_mode)
     color_mode_button.pack(side=tk.LEFT, padx=5)
 
     def change_log_level():
@@ -305,12 +317,13 @@ if __name__ == "__main__":
         current_index = LEVELS.index(current_level)
         new_index = (current_index + 1) % len(LEVELS)
         new_level = LEVELS[new_index]
-        
+
         log_widget.set_logging_level(new_level)
         log_func = getattr(logger, new_level.lower())
         log_func(f"Changed logging level from {current_level} to: {new_level}")
 
-    log_level_button = ttk.Button(button_frame, text="Change Log Level", command=change_log_level)
+    log_level_button = ctk.CTkButton(
+        button_frame, text="Change Log Level", command=change_log_level)
     log_level_button.pack(side=tk.LEFT, padx=5)
 
     root.mainloop()

@@ -4,7 +4,7 @@ from loguru import logger
 import sys
 
 # Assuming the LoguruWidget class is in a file named loguru_widget.py
-from tkloguru import LoguruWidget, setup_logger
+from ctkloguru import LoguruWidget, setup_logger
 
 class LoguruWidgetPackExample:
     """

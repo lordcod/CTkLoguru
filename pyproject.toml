@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "tkloguru"
+name = "ctkloguru"
 version = "0.1.2"
-description = "A custom Tkinter widget that displays Loguru log messages in real-time with support for styling and colors. Monitor application logs directly within your Tkinter GUI."
+description = "A custom Custom Tkinter widget that displays Loguru log messages in real-time with support for styling and colors. Monitor application logs directly within your Tkinter GUI."
 authors = ["Aareon Sullivan <askully13@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{ include = "tkloguru" }]
+packages = [{ include = "ctkloguru" }]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -24,6 +24,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.10"
 loguru = "^0.7.2"
+customtkinter = "^5.2.2"
 
 
 [tool.poetry.group.dev.dependencies]

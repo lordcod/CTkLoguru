@@ -2,7 +2,7 @@ import warnings
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="ttkbootstrap.localization.msgs")
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from tkloguru import LoguruWidget, setup_logger
+from ctkloguru import LoguruWidget, setup_logger
 from loguru import logger
 import threading
 import time
